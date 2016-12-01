@@ -11,13 +11,13 @@
 %
  
 % 2 segment tendon actuated continuum robot
-TACR.ndisks = [10;10];              % number of disks per segment
+TACR.ndisks = [10;10];               % number of disks per segment
 TACR.diskRadius = [8;8];            % disk radius
-TACR.diskHeight = 3;                % heigth of the disks
-TACR.diskPitchRadius = [6.5;3];     % pitch circle radius of disks
+TACR.diskHeight = 3;                        % heigth of the disks
+TACR.diskPitchRadius = [6.5;5];        % pitch circle radius of disks
 TACR.segmentLength = [92;102];      % segment length = length of first backbone per segment
  
-q = [0,0,0;-4,2,2];                 % actuation parameters (delta l per tendon); 
+q = [0,0,0;0,0,0];           % actuation parameters (delta l per tendon); 
                                     % Remember: only 2 tendons can be
                                     % retracted at once, the 3rd tendon has
                                     % to extend

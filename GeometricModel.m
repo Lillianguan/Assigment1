@@ -22,19 +22,24 @@ function[robotShape] = GeometricModel(TACR,q)
 
 
 %% implement the geometric model here
+
 ndisks = TACR.ndisks;
 segmentLength=TACR.segmentLength;
 diskPitchRadius = TACR.diskPitchRadius;
 
-%define the Angel
+
+%% define the Angel %%
+
 beta=pi*2/3;
 theta_0=pi/2;
 
-%get segment number and tendons number
+%% get segment number and tendons number %%
+
 seg_num=length(TACR.ndisks);
 tendons_num=length(q(1,:));
 
-% Check the input right or not
+%% Check the input right or not %%
+
 offset_sum=0;
 for a=1:seg_num
     for b=1:tendons_num
@@ -48,17 +53,21 @@ for a=1:seg_num
     offset_sum=0;
 end
 
-% calculate the Phi
+%% calculate the Phi %%
+
 phi=zeros(seg_num,1);
-phi_0=0;
 for j=1:seg_num
-    phi(j,1)=atan2(q(j,1)*cos(beta)-q(j,2),q(j,1)*sin(beta))+phi_0;
-    phi_0=phi(j,1);
+   if q(j,1)==q(j,2)==q(j,3)==0
+        phi(j,1)=0;
+   else
+         phi(j,1)=atan2(q(j,1)*cos(beta)-q(j,2),q(j,1)*sin(beta));
+   end
 end
 
-% calculate the Offset and position of tendons in endeffekt koordinatensystem
+%% calculate the Offset and position of tendons in endeffekt koordinatensystem %%
+
 deta=zeros(seg_num,tendons_num);
-r_e=zeros(seg_num,12);
+r_e=zeros(seg_num,12);       % vector in Endeffenktor koordinaten system 
 r_e(:,1:3)=0;
 for j=1:seg_num
     columns=4;
@@ -71,7 +80,7 @@ for j=1:seg_num
     end
     columns=0;
 end
-
+% vector in Endeffektor koordinaten system
 r_ee=zeros(sum(ndisks(:,1)),12);
 rows=1;
 for h=1:sum(ndisks(:,1))
@@ -81,63 +90,58 @@ for h=1:sum(ndisks(:,1))
     end
 end
 
-
-% calculate the bending angle and calculate the curveture and disk-rotation-matrix
+%% calculate the bending angle and calculate the curveture and the first disk-rotation-matrix%%
 theta=zeros(seg_num,1);
 k=zeros(seg_num,1);
 theta_l=zeros(seg_num,ndisks(1,1));
 r_be=zeros(sum(ndisks(:,1)),3);
+rot_zz{1,1}=zeros(3,3); % rotation from blending koordinaten system to Basis koordinaten system
+rot_zz{2,1}=zeros(3,3); % rotation from blending koordinaten system to Basis koordinaten system
 robotShape.diskRotation=zeros(sum(ndisks(:,1)),9); % robotShape.diskRotation matrix
 m=1; % disk counter
-rot_y=zeros(3,3); %define the Elementdrehung, um y Achse
-rot_z=zeros(3,3);%define the Elementdrehung, um z Achse
-rot_=zeros(3,3); %define the rotation matrix, 3x3
-seg_counter=0;
 for j=1:seg_num
     theta(j,1)=theta_0+q(j,1)/deta(j,1);
     k(j,1)=(pi/2-theta(j,1))/segmentLength(j,1);
-    rot_z=[cos(phi(j,1)) -sin(phi(j,1)) 0 ;sin(phi(j,1)) cos(phi(j,1)) 0; 0 0 1];
-    rot_zz{j,1}=inv([cos(phi(j,1)) -sin(phi(j,1)) 0 ;sin(phi(j,1)) cos(phi(j,1)) 0; 0 0 1]);
-    for n=seg_counter:ndisks(j,1)-(1-seg_counter);
-        theta_l(j,n+(1-seg_counter))=pi/2-n*k(j,1)*segmentLength(j,1)/(ndisks(j,1)-(1-seg_counter));
-        r_be(m,1:3)=1/k(j,1)*[1-sin(theta_l(j,n+(1-seg_counter))) 0 cos(theta_l(j,n+(1-seg_counter)))];
-        rot_angel=pi/2-theta_l(j,n+(1-seg_counter));
-        rot_y=[cos(rot_angel)  0 sin(rot_angel) ;0 1 0 ;-sin(rot_angel) 0 cos(rot_angel)];
-        %         rot_y=[cos(theta_l(j,n+1))  0 sin(theta_l(j,n+1)) ;0 1 0 ;-sin(theta_l(j,n+1)) 0 cos(theta_l(j,n+1))];
-        rot_=rot_y*rot_z; % rotation from basis to endeffekter
-        rot_=inv(rot_);
+    rot_z=[cos(phi(j,1)) -sin(phi(j,1)) 0 ;sin(phi(j,1)) cos(phi(j,1)) 0; 0 0 1]; % the Elementdrehung, um z Achse
+    rot_zz{j,1}=rot_z;
+    for n=0:ndisks(j,1)-1
+        theta_l(j,n+1)=pi/2-n*k(j,1)*segmentLength(j,1)/(ndisks(j,1)-1);
+        if k(j,1)==0
+            r_be(m,1:3)=[0 0 n*segmentLength(j,1)/(ndisks(j,1)-1)];% vector in blending koordinaten system
+        else
+            r_be(m,1:3)=1/k(j,1)*[1-sin(theta_l(j,n+1)) 0 cos(theta_l(j,n+1))];% vector in blending koordinaten system
+        end
+        rot_angel=pi/2-theta_l(j,n+1);
+        rot_y=[cos(rot_angel)  0 sin(rot_angel) ;0 1 0 ;-sin(rot_angel) 0 cos(rot_angel)];% the Elementdrehung, um y Achse
+        rot_=rot_z*rot_y; % rotation from Endeffekter to endeffekter Basis
         robotShape.diskRotation(m,:)=[rot_(1,1) rot_(1,2) rot_(1,3) rot_(2,1)  rot_(2,2) rot_(2,3) rot_(3,1)  rot_(3,2) rot_(3,3) ];
         m=m+1;
-        rot_y=zeros(3,3);
-        rot_=zeros(3,3);
     end
-    seg_counter=1;
 end
 
-% calculate the robotShape.diskPoint
+%%  calculate the robotShape.diskPoint %%
 robotShape.diskPoints=zeros(sum(ndisks(:,1)),12);
-% for h=1:sum(ndisks(:,1))
 for h=1:10
+    % rotation for the first segment
     R_rot = [robotShape.diskRotation(h,1:3);robotShape.diskRotation(h,4:6);robotShape.diskRotation(h,7:9)];
-    robotShape.diskPoints(h,1:3) =  r_be(h,1:3)+(R_rot*r_ee(h,1:3)')';
-    robotShape.diskPoints(h,4:6) = r_be(h,1:3)+(R_rot*r_ee(h,4:6)')';
-    robotShape.diskPoints(h,7:9) = r_be(h,1:3)+(R_rot*r_ee(h,7:9)')';
-    robotShape.diskPoints(h,10:12) = r_be(h,1:3)+(R_rot*r_ee(h,10:12)')';
+    robotShape.diskPoints(h,1:3) =  (rot_zz{1,1}*r_be(h,1:3)')'+(R_rot*r_ee(h,1:3)')';
+    robotShape.diskPoints(h,4:6) = (rot_zz{1,1}*r_be(h,1:3)')'+(R_rot*r_ee(h,4:6)')';
+    robotShape.diskPoints(h,7:9) = (rot_zz{1,1}*r_be(h,1:3)')'+(R_rot*r_ee(h,7:9)')';
+    robotShape.diskPoints(h,10:12) = (rot_zz{1,1}*r_be(h,1:3)')'+(R_rot*r_ee(h,10:12)')';
 end
+
 R_rot_seg1 = [robotShape.diskRotation(10,1:3);robotShape.diskRotation(10,4:6);robotShape.diskRotation(10,7:9)];
 for h=11:20
+    % rotation for the second segment
     R_rot =[robotShape.diskRotation(h,1:3);robotShape.diskRotation(h,4:6);robotShape.diskRotation(h,7:9)];
-%     robotShape.diskPoints(h,1:3) = robotShape.diskPoints(10,1:3)+(R_rot_seg1* rot_zz{1,1}*(r_be(h,1:3)+(R_rot*r_ee(h,1:3)')')')';
-%     robotShape.diskPoints(h,4:6) = robotShape.diskPoints(10,4:6)+(R_rot_seg1*rot_zz{1,1}*(r_be(h,1:3)+(R_rot*r_ee(h,4:6)')')')';
-%     robotShape.diskPoints(h,7:9) = robotShape.diskPoints(10,7:9)+(R_rot_seg1*rot_zz{1,1}*(r_be(h,1:3)+(R_rot*r_ee(h,7:9)')')')';
-%     robotShape.diskPoints(h,10:12) = robotShape.diskPoints(10,10:12)+(R_rot_seg1*rot_zz{1,1}*(r_be(h,1:3)+(R_rot*r_ee(h,10:12)')')')';
-    robotShape.diskPoints(h,1:3) = robotShape.diskPoints(10,1:3)+(R_rot_seg1* (r_be(h,1:3)+(R_rot*r_ee(h,1:3)')')')';
-    robotShape.diskPoints(h,4:6) = robotShape.diskPoints(10,4:6)+(R_rot_seg1*(r_be(h,1:3)+(R_rot*r_ee(h,4:6)')')')';
-    robotShape.diskPoints(h,7:9) = robotShape.diskPoints(10,7:9)+(R_rot_seg1*(r_be(h,1:3)+(R_rot*r_ee(h,7:9)')')')';
-    robotShape.diskPoints(h,10:12) = robotShape.diskPoints(10,10:12)+(R_rot_seg1*(r_be(h,1:3)+(R_rot*r_ee(h,10:12)')')')';
-
-
-
+    rot_=R_rot_seg1*R_rot ;
+    robotShape.diskRotation(h,:)=[rot_(1,1) rot_(1,2) rot_(1,3) rot_(2,1)  rot_(2,2) rot_(2,3) rot_(3,1)  rot_(3,2) rot_(3,3) ];
+    % diskPoint of the second segment
+    robotShape.diskPoints(h,1:3) = robotShape.diskPoints(10,1:3)+(R_rot_seg1*((rot_zz{2,1}*r_be(h,1:3)')'+(R_rot*r_ee(h,1:3)')')')';
+    robotShape.diskPoints(h,4:6) = robotShape.diskPoints(10,1:3)+(R_rot_seg1*((rot_zz{2,1}*r_be(h,1:3)')'+(R_rot*r_ee(h,4:6)')')')';
+    robotShape.diskPoints(h,7:9) = robotShape.diskPoints(10,1:3)+(R_rot_seg1*((rot_zz{2,1}*r_be(h,1:3)')'+(R_rot*r_ee(h,7:9)')')')';
+    robotShape.diskPoints(h,10:12) = robotShape.diskPoints(10,1:3)+(R_rot_seg1*((rot_zz{2,1}*r_be(h,1:3)')'+(R_rot*r_ee(h,10:12)')')')';  
 end
+
 
 
