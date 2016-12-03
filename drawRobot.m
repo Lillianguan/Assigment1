@@ -71,15 +71,15 @@ for i=1:sum(ndisks(:,1))-1
     x = [diskPoints(l,4) diskPoints(l+1,4)];
     y = [diskPoints(l,5) diskPoints(l+1,5)];
     z = [diskPoints(l,6) diskPoints(l+1,6)];
-    plot3(x,y,z,'LineWidth',1.1,'Color',[0 0 0]);
+    plot3(x,y,z,'LineWidth',1.1,'Color',[1 0 0]); % red for tendon 1
     x = [diskPoints(l,7) diskPoints(l+1,7)];
     y = [diskPoints(l,8) diskPoints(l+1,8)];
     z = [diskPoints(l,9) diskPoints(l+1,9)];
-    plot3(x,y,z,'LineWidth',1.1,'Color',[0 0 0]);
+    plot3(x,y,z,'LineWidth',1.1,'Color',[0 1 0]); % green  for tendon 2
     x = [diskPoints(l,10) diskPoints(l+1,10)];
     y = [diskPoints(l,11) diskPoints(l+1,11)];
     z = [diskPoints(l,12) diskPoints(l+1,12)];
-    plot3(x,y,z,'LineWidth',1.1,'Color',[0 0 0]);
+    plot3(x,y,z,'LineWidth',1.1,'Color',[0 0 1]); % blue  for tendon 3
     
     % plot tendons of the 2nd segment through the 1st segment
     if i <= ndisks(1,1)-1    
@@ -94,7 +94,7 @@ for i=1:sum(ndisks(:,1))-1
             x = [p_1_2nd(1,1) p_2_2nd(1,1)];
             y = [p_1_2nd(1,2) p_2_2nd(1,2)];
             z = [p_1_2nd(1,3) p_2_2nd(1,3)];
-            plot3(x,y,z,'LineWidth',1.1,'Color',[0 0 0]);
+            plot3(x,y,z,'LineWidth',1.1,'Color',[0 0 0]); % inside tendon on segment 1 black
             if i == ndisks(1,1)-1
                 diskPoints(l+1,m+3+(m-1)*2:m+5+(m-1)*2) = p_2_2nd;
             end
