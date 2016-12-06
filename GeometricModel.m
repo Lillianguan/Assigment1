@@ -43,14 +43,14 @@ tendons_num=length(q(1,:));
 offset_sum=0;
 for a=1:seg_num
     for b=1:tendons_num
-        offset_sum=offset_sum+q(a,b);
+        offset_sum=offset_sum+q(a,b)/min(abs(q(a,:)));
     end
-    if(abs(offset_sum)~=0)
+    if(abs(offset_sum-eps(-20))<0)
         msg = 'False Configuration,Please enter the right one: only 2 tendons can be retracted at once, the 3rd tendon has to extend';
         msgbox(msg,'Configuation');
         return;
     end
-    offset_sum=0;
+        offset_sum=0;
 end
 
 %% calculate the Phi %%
@@ -99,24 +99,26 @@ rot_zz{1,1}=zeros(3,3); % rotation from blending koordinaten system to Basis koo
 rot_zz{2,1}=zeros(3,3); % rotation from blending koordinaten system to Basis koordinaten system
 robotShape.diskRotation=zeros(sum(ndisks(:,1)),9); % robotShape.diskRotation matrix
 m=1; % disk counter
+disk_set=0;
 for j=1:seg_num
     theta(j,1)=theta_0+q(j,1)/deta(j,1);
     k(j,1)=(pi/2-theta(j,1))/segmentLength(j,1);
     rot_z=[cos(phi(j,1)) -sin(phi(j,1)) 0 ;sin(phi(j,1)) cos(phi(j,1)) 0; 0 0 1]; % the Elementdrehung, um z Achse
     rot_zz{j,1}=rot_z;
-    for n=0:ndisks(j,1)-1
-        theta_l(j,n+1)=pi/2-n*k(j,1)*segmentLength(j,1)/(ndisks(j,1)-1);
+    for n=disk_set:ndisks(j,1)-(1-disk_set)
+        theta_l(j,n+(1-disk_set))=pi/2-n*k(j,1)*segmentLength(j,1)/(ndisks(j,1)-(1-disk_set));
         if k(j,1)==0
-            r_be(m,1:3)=[0 0 n*segmentLength(j,1)/(ndisks(j,1)-1)];% vector in blending koordinaten system
+            r_be(m,1:3)=[0 0 n*segmentLength(j,1)/(ndisks(j,1)-(1-disk_set))];% vector in blending koordinaten system
         else
-            r_be(m,1:3)=1/k(j,1)*[1-sin(theta_l(j,n+1)) 0 cos(theta_l(j,n+1))];% vector in blending koordinaten system
+            r_be(m,1:3)=1/k(j,1)*[1-sin(theta_l(j,n+(1-disk_set))) 0 cos(theta_l(j,n+(1-disk_set)))];% vector in blending koordinaten system
         end
-        rot_angel=pi/2-theta_l(j,n+1);
+        rot_angel=pi/2-theta_l(j,n+(1-disk_set));
         rot_y=[cos(rot_angel)  0 sin(rot_angel) ;0 1 0 ;-sin(rot_angel) 0 cos(rot_angel)];% the Elementdrehung, um y Achse
         rot_=rot_z*rot_y; % rotation from Endeffekter to endeffekter Basis
         robotShape.diskRotation(m,:)=[rot_(1,1) rot_(1,2) rot_(1,3) rot_(2,1)  rot_(2,2) rot_(2,3) rot_(3,1)  rot_(3,2) rot_(3,3) ];
         m=m+1;
     end
+    disk_set=1;
 end
 
 %%  calculate the robotShape.diskPoint %%
