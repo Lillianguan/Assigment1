@@ -45,7 +45,7 @@ for a=1:seg_num
     for b=1:tendons_num
         offset_sum=offset_sum+q(a,b)/min(abs(q(a,:)));
     end
-    if(abs(offset_sum)<1E-20)
+    if(abs(offset_sum-eps(-20))<0)
         msg = 'False Configuration,Please enter the right one: only 2 tendons can be retracted at once, the 3rd tendon has to extend';
         msgbox(msg,'Configuation');
         return;
@@ -57,7 +57,7 @@ end
 
 phi=zeros(seg_num,1);
 for j=1:seg_num
-   if q(j,1)==q(j,2)==q(j,3)==0
+   if q(j,1)==0 && q(j,2)==0 && q(j,3)==0
         phi(j,1)=0;
    else
          phi(j,1)=atan2(q(j,1)*cos(beta)-q(j,2),q(j,1)*sin(beta));
@@ -103,7 +103,7 @@ disk_set=0;
 for j=1:seg_num
     theta(j,1)=theta_0+q(j,1)/deta(j,1);
     k(j,1)=(pi/2-theta(j,1))/segmentLength(j,1);
-    rot_z=[cos(phi(j,1)) -sin(phi(j,1)) 0 ;sin(phi(j,1)) cos(phi(j,1)) 0; 0 0 1]; % the Elementdrehung, um z Achse
+    rot_z=[cos(phi(j,1)) -sin(phi(j,1)) 0 ;sin(phi(j,1)) cos(phi(j,1)) 0; 0 0 1];% the Elementdrehung, um z Achse
     rot_zz{j,1}=rot_z;
     for n=disk_set:ndisks(j,1)-(1-disk_set)
         theta_l(j,n+(1-disk_set))=pi/2-n*k(j,1)*segmentLength(j,1)/(ndisks(j,1)-(1-disk_set));
@@ -114,7 +114,8 @@ for j=1:seg_num
         end
         rot_angel=pi/2-theta_l(j,n+(1-disk_set));
         rot_y=[cos(rot_angel)  0 sin(rot_angel) ;0 1 0 ;-sin(rot_angel) 0 cos(rot_angel)];% the Elementdrehung, um y Achse
-        rot_=rot_z*rot_y; % rotation from Endeffekter to endeffekter Basis
+        rot_=rot_z*rot_y;
+        % rotation from Endeffekter to endeffekter Basis
         robotShape.diskRotation(m,:)=[rot_(1,1) rot_(1,2) rot_(1,3) rot_(2,1)  rot_(2,2) rot_(2,3) rot_(3,1)  rot_(3,2) rot_(3,3) ];
         m=m+1;
     end
@@ -133,10 +134,11 @@ for h=1:10
 end
 
 R_rot_seg1 = [robotShape.diskRotation(10,1:3);robotShape.diskRotation(10,4:6);robotShape.diskRotation(10,7:9)];
+R_rot_seg1=R_rot_seg1*rot_zz{1,1};
 for h=11:20
     % rotation for the second segment
     R_rot =[robotShape.diskRotation(h,1:3);robotShape.diskRotation(h,4:6);robotShape.diskRotation(h,7:9)];
-    rot_=R_rot_seg1*R_rot ;
+    rot_=R_rot_seg1*R_rot;
     robotShape.diskRotation(h,:)=[rot_(1,1) rot_(1,2) rot_(1,3) rot_(2,1)  rot_(2,2) rot_(2,3) rot_(3,1)  rot_(3,2) rot_(3,3) ];
     % diskPoint of the second segment
     robotShape.diskPoints(h,1:3) = robotShape.diskPoints(10,1:3)+(R_rot_seg1*((rot_zz{2,1}*r_be(h,1:3)')'+(R_rot*r_ee(h,1:3)')')')';
@@ -144,6 +146,10 @@ for h=11:20
     robotShape.diskPoints(h,7:9) = robotShape.diskPoints(10,1:3)+(R_rot_seg1*((rot_zz{2,1}*r_be(h,1:3)')'+(R_rot*r_ee(h,7:9)')')')';
     robotShape.diskPoints(h,10:12) = robotShape.diskPoints(10,1:3)+(R_rot_seg1*((rot_zz{2,1}*r_be(h,1:3)')'+(R_rot*r_ee(h,10:12)')')')';  
 end
+
+%% output the Diskpoints
+filename='E:\Lillian-laptoop\Documents\Studium\3.Semester\Contimuum Robotor\Assignment\ModelDate\Mq_9.xlsx';
+xlswrite(filename,robotShape.diskPoints(:,1:3));
 
 
 
