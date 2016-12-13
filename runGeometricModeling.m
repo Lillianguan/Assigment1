@@ -17,7 +17,7 @@ TACR.diskHeight = 3;                        % heigth of the disks
 TACR.diskPitchRadius = [6.5;5];        % pitch circle radius of disks
 TACR.segmentLength = [92;102];      % segment length = length of first backbone per segment
  
-q = [3, -2, -1; -3, 1, 2];           % actuation parameters (delta l per tendon); 
+q = [3.6, -1.2, -2.4; 0, 0, 0];           % actuation parameters (delta l per tendon); 
                                     % Remember: only 2 tendons can be
                                     % retracted at once, the 3rd tendon has
                                     % to extend

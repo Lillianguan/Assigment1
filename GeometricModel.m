@@ -60,7 +60,7 @@ for j=1:seg_num
    if q(j,1)==0 && q(j,2)==0 && q(j,3)==0
         phi(j,1)=0;
    else
-         phi(j,1)=atan2(q(j,1)*cos(beta)-q(j,2),q(j,1)*sin(beta));
+         phi(j,1)=atan2(q(j,1)*cos(beta)-q(j,3),q(j,1)*sin(beta));
    end
 end
 
