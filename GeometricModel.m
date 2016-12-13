@@ -73,9 +73,9 @@ for j=1:seg_num
     columns=4;
     for i=1:tendons_num
         % Offset
-        deta(j,i)=diskPitchRadius(j,1)*cos(phi(j,1)+(i-1)*beta);
+        deta(j,i)=diskPitchRadius(j,1)*cos(phi(j,1)+(1-i)*beta);
         % Position
-        r_e(j,columns:columns+2)=diskPitchRadius(j,1)*[cos(phi(j,1)+(i-1)*beta) -sin(phi(j,1)+(i-1)*beta) 0];
+        r_e(j,columns:columns+2)=diskPitchRadius(j,1)*[cos(phi(j,1)+(1-i)*beta) -sin(phi(j,1)+(1-i)*beta) 0];
         columns=columns+3;
     end
     columns=0;
@@ -147,7 +147,7 @@ for h=11:20
     robotShape.diskPoints(h,10:12) = robotShape.diskPoints(10,1:3)+(R_rot_seg1*((rot_zz{2,1}*r_be(h,1:3)')'+(R_rot*r_ee(h,10:12)')')')';  
 end
 
-%% output the Diskpoints
+%% compute the backbone and output the result
 % filename='E:\Lillian-laptoop\Documents\Studium\3.Semester\Contimuum Robotor\Assignment\ModelDate\Mq_10.xlsx';
 % xlswrite(filename,robotShape.diskPoints(:,1:3));
 
