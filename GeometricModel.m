@@ -119,7 +119,7 @@ for j=1:seg_num
         robotShape.diskRotation(m,:)=[rot_(1,1) rot_(1,2) rot_(1,3) rot_(2,1)  rot_(2,2) rot_(2,3) rot_(3,1)  rot_(3,2) rot_(3,3) ];
         m=m+1;
     end
-    disk_set=1;
+    disk_set=disk_set+1;
 end
 
 %%  calculate the robotShape.diskPoint %%
@@ -134,7 +134,7 @@ for h=1:10
 end
 
 R_rot_seg1 = [robotShape.diskRotation(10,1:3);robotShape.diskRotation(10,4:6);robotShape.diskRotation(10,7:9)];
-R_rot_seg1=R_rot_seg1*rot_zz{1,1};
+R_rot_seg1=R_rot_seg1*inv(rot_zz{1,1});
 for h=11:20
     % rotation for the second segment
     R_rot =[robotShape.diskRotation(h,1:3);robotShape.diskRotation(h,4:6);robotShape.diskRotation(h,7:9)];
@@ -148,8 +148,8 @@ for h=11:20
 end
 
 %% output the Diskpoints
-filename='E:\Lillian-laptoop\Documents\Studium\3.Semester\Contimuum Robotor\Assignment\ModelDate\Mq_9.xlsx';
-xlswrite(filename,robotShape.diskPoints(:,1:3));
+% filename='E:\Lillian-laptoop\Documents\Studium\3.Semester\Contimuum Robotor\Assignment\ModelDate\Mq_10.xlsx';
+% xlswrite(filename,robotShape.diskPoints(:,1:3));
 
 
 
