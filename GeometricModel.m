@@ -45,11 +45,12 @@ for a=1:seg_num
     for b=1:tendons_num
         offset_sum=offset_sum+q(a,b)/min(abs(q(a,:)));
     end
-    if(abs(offset_sum-eps(-20))<0)
+%  if abs(offset_sum)<1E-20
+if(abs(offset_sum-eps(-20))<0)
         msg = 'False Configuration,Please enter the right one: only 2 tendons can be retracted at once, the 3rd tendon has to extend';
         msgbox(msg,'Configuation');
         return;
-    end
+end
         offset_sum=0;
 end
 
