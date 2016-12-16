@@ -40,18 +40,16 @@ tendons_num=length(q(1,:));
 
 %% Check the input right or not %%
 
-offset_sum=0;
 for a=1:seg_num
+    offset_sum=0;
     for b=1:tendons_num
-        offset_sum=offset_sum+q(a,b)/min(abs(q(a,:)));
+        offset_sum=offset_sum+q(a,b);
     end
-%  if abs(offset_sum)<1E-20
-if(abs(offset_sum-eps(-20))<0)
+ if abs(offset_sum)>1E-10;
         msg = 'False Configuration,Please enter the right one: only 2 tendons can be retracted at once, the 3rd tendon has to extend';
         msgbox(msg,'Configuation');
         return;
-end
-        offset_sum=0;
+ end
 end
 
 %% calculate the Phi %%
