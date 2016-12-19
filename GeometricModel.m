@@ -133,7 +133,7 @@ for h=1:10
 end
 
 R_rot_seg1 = [robotShape.diskRotation(10,1:3);robotShape.diskRotation(10,4:6);robotShape.diskRotation(10,7:9)];
-R_rot_seg1=R_rot_seg1*inv(rot_zz{1,1});
+R_rot_seg1=R_rot_seg1*rot_zz{1,1}';
 for h=11:20
     % rotation for the second segment
     R_rot =[robotShape.diskRotation(h,1:3);robotShape.diskRotation(h,4:6);robotShape.diskRotation(h,7:9)];
