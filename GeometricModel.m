@@ -123,6 +123,10 @@ for h=1:10
     robotShape.diskPoints(h,10:12) = r_be(h,1:3)+(R_rot*r_ee(h,10:12)')';
 end
 R_rot_seg1 = [robotShape.diskRotation(10,1:3);robotShape.diskRotation(10,4:6);robotShape.diskRotation(10,7:9)];
+<<<<<<< HEAD
+=======
+R_rot_seg1=R_rot_seg1*rot_zz{1,1}';
+>>>>>>> 94d27714305c826e3282567500291b04e0ded0f4
 for h=11:20
     R_rot =[robotShape.diskRotation(h,1:3);robotShape.diskRotation(h,4:6);robotShape.diskRotation(h,7:9)];
 %     robotShape.diskPoints(h,1:3) = robotShape.diskPoints(10,1:3)+(R_rot_seg1* rot_zz{1,1}*(r_be(h,1:3)+(R_rot*r_ee(h,1:3)')')')';
